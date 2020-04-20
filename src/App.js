@@ -18,11 +18,26 @@ class App extends React.Component {
 
   unsubsribeFromAuth = null
 
+  //checks if user logged in
   componentDidMount(){
-    this.unsubsribeFromAuth = auth.onAuthStateChanged(async user => {
-      createUserProfileDocument(user);
+    this.unsubsribeFromAuth = auth.onAuthStateChanged(async userAuth =>{
+      if (userAuth){
+        const userRef = await createUserProfileDocument(userAuth);
+        
+        userRef.onSnapshot(snapShot => {
+          this.setState({
+            currentUser: {
+              id: snapShot.id,
+              ...snapShot.data()
+            }
+          });
+        });        
+      } else {
+        this.setState({ currentUser: userAuth });
+      }
     });
   }
+
 
   componentWillUnmount(){
     this.unsubsribeFromAuth();
